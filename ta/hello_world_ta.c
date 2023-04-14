@@ -29,7 +29,8 @@
 #include <tee_internal_api_extensions.h>
 
 #include <hello_world_ta.h>
-
+#define ROOT_PASS_KEY   7
+#define KEY_SIZE    26
 /*
  * Called when the instance of the TA is created. This is the first call in
  * the TA.
@@ -94,6 +95,22 @@ void TA_CloseSessionEntryPoint(void __maybe_unused *sess_ctx)
 	IMSG("Goodbye!\n");
 }
 
+static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
+    /* for debugging */
+    char* pl = (char*)params[0].memref.buffer;
+    int pl_len = strlen(pl);
+    char encrypted[BUF_SIZE];
+    char arr_key[KEY_SIZE] = {0, };
+    IMSG("PlainText: %s\n", params[0].tmpref.buffer);
+
+    TEE_GenerateRandom((void*)arr_key, sizeof(char)*KEY_SIZE);
+    IMSG("Key: %s", arr_key);
+    return 255; // for test.
+    return TEE_SUCCESS;
+}
+static TEE_Result Caesar_decrypt(uint32_t param_tyoes, TEE_Param params[4]) {
+    return TEE_SUCCESS;
+}
 static TEE_Result inc_value(uint32_t param_types,
 	TEE_Param params[4])
 {
@@ -149,6 +166,10 @@ TEE_Result TA_InvokeCommandEntryPoint(void __maybe_unused *sess_ctx,
 		return inc_value(param_types, params);
 	case TA_HELLO_WORLD_CMD_DEC_VALUE:
 		return dec_value(param_types, params);
+    case TA_HW_CMD_CAESAR_ENC_VALUE:
+        return Caesar_encrypt(param_types, params);
+    case TA_HW_CMD_CAESAR_DEC_VALUE:
+        return Caesar_decrypt(param_types, params);
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;
 	}

@@ -39,5 +39,7 @@
 /* The function IDs implemented in this TA */
 #define TA_HELLO_WORLD_CMD_INC_VALUE		0
 #define TA_HELLO_WORLD_CMD_DEC_VALUE		1
-
+#define TA_HW_CMD_CAESAR_ENC_VALUE          2
+#define TA_HW_CMD_CAESAR_DEC_VALUE          3
+#define BUF_SIZE 64     // 64 byte buffer size.
 #endif /*TA_HELLO_WORLD_H*/
