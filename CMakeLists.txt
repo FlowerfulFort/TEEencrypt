@@ -1,4 +1,4 @@
-project (optee_example_hello_world C)
+project (TEEencrypt C)
 
 set (SRC host/main.c)
 

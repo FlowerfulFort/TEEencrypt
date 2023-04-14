@@ -166,9 +166,9 @@ TEE_Result TA_InvokeCommandEntryPoint(void __maybe_unused *sess_ctx,
 		return inc_value(param_types, params);
 	case TA_HELLO_WORLD_CMD_DEC_VALUE:
 		return dec_value(param_types, params);
-    case TA_HW_CMD_CAESAR_ENC_VALUE:
+    case TA_TEEencrypt_CMD_CAESAR_ENC_VALUE:
         return Caesar_encrypt(param_types, params);
-    case TA_HW_CMD_CAESAR_DEC_VALUE:
+    case TA_TEEencrypt_CMD_CAESAR_DEC_VALUE:
         return Caesar_decrypt(param_types, params);
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;

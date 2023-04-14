@@ -33,7 +33,7 @@
 #include <tee_client_api.h>
 
 /* To the the UUID (found the the TA's h-file(s)) */
-#include <hello_world_ta.h>
+#include <TEEencrypt_ta.h>
 
 void printUsage() {
     printf("Usage: \n");
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 	TEEC_Context ctx;
 	TEEC_Session sess;
 	TEEC_Operation op;
-	TEEC_UUID uuid = TA_HELLO_WORLD_UUID;
+	TEEC_UUID uuid = TA_TEEencrypt_UUID;
 	uint32_t err_origin;
     FILE* f, key, dest_cipher, dest_key;
     char buffer[BUF_SIZE];  // buffer.
@@ -114,7 +114,7 @@ MAIN:
         op.params[0].tmpref.len = BUF_SIZE;
         printf("Invoking TA to encrypt %s\n", buffer);
         res = TEEC_InvokeCommand(
-            &sess, TA_HW_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
+            &sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
         if (res != TEEC_SUCCESS) 
             errx(1, "TEEC_InvokeCommand failed");
         
@@ -140,7 +140,7 @@ MAIN:
         printf("Invoking TA to decrypt %s\n", op.params[0].tmpref.buffer);
 
         res = TEEC_InvokeCommand(
-            &sess, TA_HW_CMD_CAESAR_DEC_VALUE, &op, &err_origin);
+            &sess, TA_TEEencrypt_CMD_CAESAR_DEC_VALUE, &op, &err_origin);
         if (res != TEEC_SUCCESS)
             errx(1, "TEEC_InvokeCommand failed");
         

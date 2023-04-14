@@ -33,9 +33,9 @@
 #define USER_TA_HEADER_DEFINES_H
 
 /* To get the TA UUID definition */
-#include <hello_world_ta.h>
+#include <TEEencrypt_ta.h>
 
-#define TA_UUID				TA_HELLO_WORLD_UUID
+#define TA_UUID				TA_TEEencrypt_UUID
 
 /*
  * TA properties: multi-instance TA, no specific attribute

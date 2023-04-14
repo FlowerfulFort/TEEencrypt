@@ -24,22 +24,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TA_HELLO_WORLD_H
-#define TA_HELLO_WORLD_H
+#ifndef TA_TEEENCRYPT_H
+#define TA_TEEENCRYPT_H
 
 
 /*
  * This UUID is generated with uuidgen
  * the ITU-T UUID generator at http://www.itu.int/ITU-T/asn1/uuid.html
  */
-#define TA_HELLO_WORLD_UUID \
-	{ 0x8aaaf200, 0x2450, 0x11e4, \
-		{ 0xab, 0xe2, 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b} }
+#define TA_TEEencrypt_UUID \
+	{ 0x646c9956, 0xe413, 0x4054, \
+		{ 0xbb, 0x9d, 0x6f, 0x59, 0xf4, 0x33, 0x3c, 0x86} }
 
 /* The function IDs implemented in this TA */
 #define TA_HELLO_WORLD_CMD_INC_VALUE		0
 #define TA_HELLO_WORLD_CMD_DEC_VALUE		1
-#define TA_HW_CMD_CAESAR_ENC_VALUE          2
-#define TA_HW_CMD_CAESAR_DEC_VALUE          3
+#define TA_TEEencrypt_CMD_CAESAR_ENC_VALUE  2
+#define TA_TEEencrypt_CMD_CAESAR_DEC_VALUE  3
 #define BUF_SIZE 64     // 64 byte buffer size.
 #endif /*TA_HELLO_WORLD_H*/
