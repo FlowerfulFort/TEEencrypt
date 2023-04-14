@@ -35,7 +35,12 @@
 /* To the the UUID (found the the TA's h-file(s)) */
 #include <hello_world_ta.h>
 
-int main(void)
+void printUsage() {
+    printf("Usage: \n");
+    printf("\tEncryption: %s -e [PlaintextFile]\n");
+    printf("\tDecryption: %s -d [CipherTextFile] [KeyFile]\n");
+}
+int main(int argc, char* argv[])
 {
 	TEEC_Result res;
 	TEEC_Context ctx;
@@ -44,6 +49,13 @@ int main(void)
 	TEEC_UUID uuid = TA_HELLO_WORLD_UUID;
 	uint32_t err_origin;
 
+    if ((strcmp(argv[1], "-e") == 0 && argc == 3) || (strcmp(argv[1], "-d") == 0 && argc == 4)) {
+        goto MAIN;
+    }
+    printUsage();
+    return 1;
+
+MAIN:
 	/* Initialize a context connecting us to the TEE */
 	res = TEEC_InitializeContext(NULL, &ctx);
 	if (res != TEEC_SUCCESS)
