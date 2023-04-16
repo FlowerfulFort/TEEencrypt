@@ -29,8 +29,9 @@
 #include <tee_internal_api_extensions.h>
 
 #include <TEEencrypt_ta.h>
-#define ROOT_PASS_KEY   7
+#include <string.h>
 #define KEY_SIZE    26
+const int root_key = 7;
 /*
  * Called when the instance of the TA is created. This is the first call in
  * the TA.
