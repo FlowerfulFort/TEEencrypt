@@ -35,10 +35,10 @@
 /* To the the UUID (found the the TA's h-file(s)) */
 #include <TEEencrypt_ta.h>
 
-void printUsage() {
+void printUsage(char* filename) {
     printf("Usage: \n");
-    printf("\tEncryption: %s -e [PlaintextFile]\n");
-    printf("\tDecryption: %s -d [CipherTextFile] [KeyFile]\n");
+    printf("\tEncryption: %s -e [PlaintextFile]\n", filename);
+    printf("\tDecryption: %s -d [CipherTextFile] [KeyFile]\n", filename);
 }
 int main(int argc, char* argv[])
 {
@@ -48,12 +48,12 @@ int main(int argc, char* argv[])
 	TEEC_Operation op;
 	TEEC_UUID uuid = TA_TEEencrypt_UUID;
 	uint32_t err_origin;
-    FILE* f, key, dest_cipher, dest_key;
+    FILE *f, *key, *dest_cipher, *dest_key;
     char buffer[BUF_SIZE];  // buffer.
     if ((strcmp(argv[1], "-e") == 0 && argc == 3) || (strcmp(argv[1], "-d") == 0 && argc == 4)) {
         goto MAIN;
     }
-    printUsage();
+    printUsage(argv[0]);
     return 1;
 
 MAIN:
@@ -111,7 +111,7 @@ MAIN:
         fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
 
         memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
-        op.params[0].tmpref.len = BUF_SIZE;
+        op.params[0].tmpref.size = BUF_SIZE;
         printf("Invoking TA to encrypt %s\n", buffer);
         res = TEEC_InvokeCommand(
             &sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
@@ -119,9 +119,9 @@ MAIN:
             errx(1, "TEEC_InvokeCommand failed");
         
         dest_cipher = fopen("ciphertext.txt", "wt");
-        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.len, dest_cipher);
+        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.size, dest_cipher);
         dest_key = fopen("encryptedkey.txt", "wt");
-        fwrite(op.params[1].tmpref.buffer, sizeof(char), op.params[1].tmpref.len, dest_key);
+        fwrite(op.params[1].tmpref.buffer, sizeof(char), op.params[1].tmpref.size, dest_key);
         fclose(f);
         fclose(dest_cipher);
         fclose(dest_key);
@@ -133,10 +133,10 @@ MAIN:
         key = fopen(argv[3], "r");
         fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
         memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
-        op.params[0].tmpref.len = BUF_SIZE;
+        op.params[0].tmpref.size = BUF_SIZE;
         fread(buffer, sizeof(char), BUF_SIZE, key);
         memcpy(op.params[1].tmpref.buffer, buffer, BUF_SIZE);
-        op.params[1].tmpref.len = BUF_SIZE;
+        op.params[1].tmpref.size = BUF_SIZE;
         printf("Invoking TA to decrypt %s\n", op.params[0].tmpref.buffer);
 
         res = TEEC_InvokeCommand(
@@ -145,7 +145,7 @@ MAIN:
             errx(1, "TEEC_InvokeCommand failed");
         
         dest_cipher = fopen("decryptedtext.txt", "w");
-        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.len, dest_cipher);
+        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.size, dest_cipher);
         fclose(f);
         fclose(key);
         fclose(dest_cipher);

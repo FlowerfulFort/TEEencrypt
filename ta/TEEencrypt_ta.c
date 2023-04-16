@@ -101,7 +101,7 @@ static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
     int pl_len = strlen(pl);
     char encrypted[BUF_SIZE];
     char arr_key[KEY_SIZE] = {0, };
-    IMSG("PlainText: %s\n", params[0].tmpref.buffer);
+    IMSG("PlainText: %s\n", params[0].memref.buffer);
 
     TEE_GenerateRandom((void*)arr_key, sizeof(char)*KEY_SIZE);
     IMSG("Key: %s", arr_key);
