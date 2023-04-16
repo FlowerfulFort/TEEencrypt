@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 	TEEC_UUID uuid = TA_TEEencrypt_UUID;
 	uint32_t err_origin;
     FILE *f, *key, *dest_cipher, *dest_key;
-    char buffer[BUF_SIZE];  // buffer.
+    char buffer[BUF_SIZE] = {0, };  // buffer.
     if ((strcmp(argv[1], "-e") == 0 && argc == 3) || (strcmp(argv[1], "-d") == 0 && argc == 4)) {
         goto MAIN;
     }
@@ -107,12 +107,19 @@ MAIN:
 
     if (strcmp(argv[1], "-e") == 0)     // Encrypt
     {
+        puts("Encrypt start");
         f = fopen(argv[2], "r");
+        puts("File reading");
         fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
-
-        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
+        if (buffer[strlen(buffer)-1] == '\n') {
+            buffer[strlen(buffer)-1] = '\0';
+        }
+        printf("Readed: %s, Length: %d\n", buffer, strlen(buffer));
+        op.params[0].tmpref.buffer = buffer;
+//        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
+        puts("MEMCPY ended");
         op.params[0].tmpref.size = BUF_SIZE;
-        printf("Invoking TA to encrypt %s\n", buffer);
+        printf("Invoking TA to encrypt %s\n", op.params[0].tmpref.buffer);
         res = TEEC_InvokeCommand(
             &sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
         if (res != TEEC_SUCCESS) 
