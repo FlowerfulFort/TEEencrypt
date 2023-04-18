@@ -49,7 +49,10 @@ int main(int argc, char* argv[])
 	TEEC_UUID uuid = TA_TEEencrypt_UUID;
 	uint32_t err_origin;
     FILE *f, *key, *dest_cipher, *dest_key;
-    char buffer[BUF_SIZE];  // buffer.
+    char val_key = 0;
+    int i_key = 0;
+    char buffer[BUF_SIZE] = {0, };  // buffer.
+
     if ((strcmp(argv[1], "-e") == 0 && argc == 3) || (strcmp(argv[1], "-d") == 0 && argc == 4)) {
         goto MAIN;
     }
@@ -62,66 +65,46 @@ MAIN:
 	if (res != TEEC_SUCCESS)
 		errx(1, "TEEC_InitializeContext failed with code 0x%x", res);
 
-	/*
-	 * Open a session to the "hello world" TA, the TA will print "hello
-	 * world!" in the log when the session is created.
-	 */
 	res = TEEC_OpenSession(&ctx, &sess, &uuid,
 			       TEEC_LOGIN_PUBLIC, NULL, NULL, &err_origin);
 	if (res != TEEC_SUCCESS)
 		errx(1, "TEEC_Opensession failed with code 0x%x origin 0x%x",
 			res, err_origin);
 
-	/*
-	 * Execute a function in the TA by invoking it, in this case
-	 * we're incrementing a number.
-	 *
-	 * The value of command ID part and how the parameters are
-	 * interpreted is part of the interface provided by the TA.
-	 */
-
-	/* Clear the TEEC_Operation struct */
 	memset(&op, 0, sizeof(op));
 
-	/*
-	 * Prepare the argument. Pass a value in the first parameter,
-	 * the remaining three parameters are unused.
-	 */
-	// op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,
-	// 				 TEEC_NONE, TEEC_NONE);
-	// op.params[0].value.a = 42;
-
-	/*
-	 * TA_HELLO_WORLD_CMD_INC_VALUE is the actual function in the TA to be
-	 * called.
-	 */
-	// printf("Invoking TA to increment %d\n", op.params[0].value.a);
-	// res = TEEC_InvokeCommand(&sess, TA_HELLO_WORLD_CMD_INC_VALUE, &op,
-	// 			 &err_origin);
-	// if (res != TEEC_SUCCESS)
-	// 	errx(1, "TEEC_InvokeCommand failed with code 0x%x origin 0x%x",
-	// 		res, err_origin);
-	// printf("TA incremented value to %d\n", op.params[0].value.a);
     op.paramTypes = TEEC_PARAM_TYPES(
         TEEC_MEMREF_TEMP_OUTPUT, TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE, TEEC_NONE);
 
     if (strcmp(argv[1], "-e") == 0)     // Encrypt
     {
+        puts("Encrypt start");
         f = fopen(argv[2], "r");
+        puts("File reading");
         fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
-
-        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
+        if (buffer[strlen(buffer)-1] == '\n') {
+            buffer[strlen(buffer)-1] = '\0';
+        }
+        printf("Readed: %s, Length: %d\n", buffer, strlen(buffer));
+        op.params[0].tmpref.buffer = buffer;
+//        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
         op.params[0].tmpref.size = BUF_SIZE;
-        printf("Invoking TA to encrypt %s\n", buffer);
+
+        op.params[1].tmpref.buffer = &val_key;
+        op.params[1].tmpref.size = sizeof(char);
+
+        printf("Invoking TA to encrypt %s\n", op.params[0].tmpref.buffer);
         res = TEEC_InvokeCommand(
             &sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
         if (res != TEEC_SUCCESS) 
             errx(1, "TEEC_InvokeCommand failed");
-        
+
         dest_cipher = fopen("ciphertext.txt", "wt");
-        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.size, dest_cipher);
+        fprintf(dest_cipher, "%s\n", buffer);
+//        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.size, dest_cipher);
         dest_key = fopen("encryptedkey.txt", "wt");
-        fwrite(op.params[1].tmpref.buffer, sizeof(char), op.params[1].tmpref.size, dest_key);
+        fprintf(dest_key, "%d\n", val_key);
+//        fwrite(op.params[1].tmpref.buffer, sizeof(char), op.params[1].tmpref.size, dest_key);
         fclose(f);
         fclose(dest_cipher);
         fclose(dest_key);
@@ -136,7 +119,7 @@ MAIN:
         op.params[0].tmpref.size = BUF_SIZE;
         fread(buffer, sizeof(char), BUF_SIZE, key);
         memcpy(op.params[1].tmpref.buffer, buffer, BUF_SIZE);
-        op.params[1].tmpref.size = BUF_SIZE;
+        op.params[1].tmpref.size = sizeof(char);
         printf("Invoking TA to decrypt %s\n", op.params[0].tmpref.buffer);
 
         res = TEEC_InvokeCommand(

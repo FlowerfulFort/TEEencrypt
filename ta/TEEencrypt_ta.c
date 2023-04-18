@@ -31,6 +31,7 @@
 #include <TEEencrypt_ta.h>
 #include <string.h>
 #define KEY_SIZE    26
+
 const int root_key = 7;
 /*
  * Called when the instance of the TA is created. This is the first call in
@@ -101,12 +102,38 @@ static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
     char* pl = (char*)params[0].memref.buffer;
     int pl_len = strlen(pl);
     char encrypted[BUF_SIZE];
-    char arr_key[KEY_SIZE] = {0, };
-    IMSG("PlainText: %s\n", params[0].memref.buffer);
+    char random_key;
+    int k = 0;
 
-    TEE_GenerateRandom((void*)arr_key, sizeof(char)*KEY_SIZE);
-    IMSG("Key: %s", arr_key);
-    return 255; // for test.
+    IMSG("PlainText: %s\n", pl);
+
+//    IMSG("Key before Convert: ");
+    TEE_GenerateRandom((void*)(&random_key), sizeof(char));
+
+    IMSG("Key before Convert: 0x%02x", random_key);
+    random_key %= 26;
+    IMSG("Converted: 0x%02x", random_key);
+    strcpy(encrypted, pl);
+	for (int i=0;i<pl_len;i++) {
+		if (encrypted[i] >= 'A' && encrypted[i] <= 'Z') {
+			encrypted[i] += random_key;
+			if (encrypted[i] > 'Z') encrypted[i] -= 26;
+		}
+		else if(encrypted[i] >='a' && encrypted[i] <= 'z') {
+			encrypted[i] += random_key;
+			if (encrypted[i] > 'z') encrypted[i] -= 26;
+		}
+	}
+    encrypted[pl_len] = '\0';
+    IMSG("Cipher : %s", encrypted);
+    strcpy(pl, encrypted);
+
+    random_key += root_key;	// random_key encrypt by root_key.
+    (*(char*)params[1].memref.buffer) = random_key;
+//    for (int i=0;i<KEY_SIZE;i++) {
+//        IMSG("%c , %02x" ,arr_key[i], *(pointer++));
+//    }
+    // IMSG("Key: %s", arr_key);
     return TEE_SUCCESS;
 }
 static TEE_Result Caesar_decrypt(uint32_t param_tyoes, TEE_Param params[4]) {
