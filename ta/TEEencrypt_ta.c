@@ -99,7 +99,6 @@ void TA_CloseSessionEntryPoint(void __maybe_unused *sess_ctx)
 }
 
 static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
-<<<<<<< HEAD
 	char* pl = (char*)params[0].memref.buffer;
 	int pl_len = strlen(pl);
 	char encrypted[BUF_SIZE];
@@ -115,24 +114,6 @@ static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
 		IMSG("Converted: 0x%02x", random_key);
 	} while(random_key == 0);
 	strcpy(encrypted, pl);
-=======
-    /* for debugging */
-    char* pl = (char*)params[0].memref.buffer;
-    int pl_len = strlen(pl);
-    char encrypted[BUF_SIZE];
-    char random_key;
-    int k = 0;
-
-    IMSG("PlainText: %s\n", pl);
-
-//    IMSG("Key before Convert: ");
-    TEE_GenerateRandom((void*)(&random_key), sizeof(char));
-
-    IMSG("Key before Convert: 0x%02x", random_key);
-    random_key %= 26;
-    IMSG("Converted: 0x%02x", random_key);
-    strcpy(encrypted, pl);
->>>>>>> c088fbf54dca329281b0a307a4f096b25f70d6cb
 	for (int i=0;i<pl_len;i++) {
 		if (encrypted[i] >= 'A' && encrypted[i] <= 'Z') {
 			encrypted[i] += random_key;
@@ -143,7 +124,6 @@ static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
 			if (encrypted[i] > 'z') encrypted[i] -= 26;
 		}
 	}
-<<<<<<< HEAD
 	encrypted[pl_len] = '\0';
 	IMSG("Cipher : %s", encrypted);
 	strcpy(pl, encrypted);
@@ -152,19 +132,6 @@ static TEE_Result Caesar_encrypt(uint32_t param_types, TEE_Param params[4]) {
 	(*(char*)params[1].memref.buffer) = random_key;
 
 	return TEE_SUCCESS;
-=======
-    encrypted[pl_len] = '\0';
-    IMSG("Cipher : %s", encrypted);
-    strcpy(pl, encrypted);
-
-    random_key += root_key;	// random_key encrypt by root_key.
-    (*(char*)params[1].memref.buffer) = random_key;
-//    for (int i=0;i<KEY_SIZE;i++) {
-//        IMSG("%c , %02x" ,arr_key[i], *(pointer++));
-//    }
-    // IMSG("Key: %s", arr_key);
-    return TEE_SUCCESS;
->>>>>>> c088fbf54dca329281b0a307a4f096b25f70d6cb
 }
 static TEE_Result Caesar_decrypt(uint32_t param_types, TEE_Param params[4]) {
 	char *pl = (char*)params[0].memref.buffer;
