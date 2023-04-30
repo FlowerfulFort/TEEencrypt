@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
 	TEEC_Operation op;
 	TEEC_UUID uuid = TA_TEEencrypt_UUID;
 	uint32_t err_origin;
+<<<<<<< HEAD
 	FILE *f, *key, *dest_cipher, *dest_key;
 	char val_key = 0;
 	char buffer[BUF_SIZE] = {0, };  // buffer.
@@ -60,6 +61,18 @@ int main(int argc, char* argv[])
 PRINTUSAGE:
 	printUsage(argv[0]);
 	return 1;
+=======
+    FILE *f, *key, *dest_cipher, *dest_key;
+    char val_key = 0;
+    int i_key = 0;
+    char buffer[BUF_SIZE] = {0, };  // buffer.
+
+    if ((strcmp(argv[1], "-e") == 0 && argc == 3) || (strcmp(argv[1], "-d") == 0 && argc == 4)) {
+        goto MAIN;
+    }
+    printUsage(argv[0]);
+    return 1;
+>>>>>>> c088fbf54dca329281b0a307a4f096b25f70d6cb
 
 MAIN:
 	/* Initialize a context connecting us to the TEE */
@@ -75,6 +88,7 @@ MAIN:
 
 	memset(&op, 0, sizeof(op));
 
+<<<<<<< HEAD
 	op.paramTypes = TEEC_PARAM_TYPES(
  		TEEC_MEMREF_TEMP_OUTPUT, TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE, TEEC_NONE);
 
@@ -100,6 +114,56 @@ MAIN:
 			&sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
 		if (res != TEEC_SUCCESS)
 			errx(1, "TEEC_InvokeCommand failed");
+=======
+    op.paramTypes = TEEC_PARAM_TYPES(
+        TEEC_MEMREF_TEMP_OUTPUT, TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE, TEEC_NONE);
+
+    if (strcmp(argv[1], "-e") == 0)     // Encrypt
+    {
+        puts("Encrypt start");
+        f = fopen(argv[2], "r");
+        puts("File reading");
+        fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
+        if (buffer[strlen(buffer)-1] == '\n') {
+            buffer[strlen(buffer)-1] = '\0';
+        }
+        printf("Readed: %s, Length: %d\n", buffer, strlen(buffer));
+        op.params[0].tmpref.buffer = buffer;
+//        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
+        op.params[0].tmpref.size = BUF_SIZE;
+
+        op.params[1].tmpref.buffer = &val_key;
+        op.params[1].tmpref.size = sizeof(char);
+
+        printf("Invoking TA to encrypt %s\n", op.params[0].tmpref.buffer);
+        res = TEEC_InvokeCommand(
+            &sess, TA_TEEencrypt_CMD_CAESAR_ENC_VALUE, &op, &err_origin);
+        if (res != TEEC_SUCCESS) 
+            errx(1, "TEEC_InvokeCommand failed");
+
+        dest_cipher = fopen("ciphertext.txt", "wt");
+        fprintf(dest_cipher, "%s\n", buffer);
+//        fwrite(op.params[0].tmpref.buffer, sizeof(char), op.params[0].tmpref.size, dest_cipher);
+        dest_key = fopen("encryptedkey.txt", "wt");
+        fprintf(dest_key, "%d\n", val_key);
+//        fwrite(op.params[1].tmpref.buffer, sizeof(char), op.params[1].tmpref.size, dest_key);
+        fclose(f);
+        fclose(dest_cipher);
+        fclose(dest_key);
+        printf("Encryption Success. Check \"ciphertext.txt\" and \"encryptedkey.txt\".\n");
+    }
+    else if (strcmp(argv[1], "-d") == 0)
+    {
+        f = fopen(argv[2], "r");
+        key = fopen(argv[3], "r");
+        fread(buffer, sizeof(char), BUF_SIZE, f);   // read file.
+        memcpy(op.params[0].tmpref.buffer, buffer, BUF_SIZE);
+        op.params[0].tmpref.size = BUF_SIZE;
+        fread(buffer, sizeof(char), BUF_SIZE, key);
+        memcpy(op.params[1].tmpref.buffer, buffer, BUF_SIZE);
+        op.params[1].tmpref.size = sizeof(char);
+        printf("Invoking TA to decrypt %s\n", op.params[0].tmpref.buffer);
+>>>>>>> c088fbf54dca329281b0a307a4f096b25f70d6cb
 
 		dest_cipher = fopen("ciphertext.txt", "wt");
 		fprintf(dest_cipher, "%s\n", buffer);
